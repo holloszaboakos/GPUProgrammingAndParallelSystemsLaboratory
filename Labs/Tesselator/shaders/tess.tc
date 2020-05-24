@@ -1,0 +1,29 @@
+#version 430
+
+layout(vertices = 4) out;
+
+in vec4 tPosition[];
+out vec4 tcPosition[];
+
+uniform int tessLevelInner;
+uniform int tessLevelOuter;
+
+void main()
+{
+	tcPosition[gl_InvocationID] = tPosition[gl_InvocationID];
+	if(gl_InvocationID == 0)
+	{
+		float d = 0.0;
+		for(int i=0; i<4; i++){
+			d+=(1.0 - tPosition[i].z);
+			}
+		d /= 4.0;
+		gl_TessLevelInner[0] = 10.0 / d;
+		gl_TessLevelInner[1] = 10.0 / d;
+
+		gl_TessLevelOuter[0] = 10.0 / d;
+		gl_TessLevelOuter[1] = 10.0 / d;
+		gl_TessLevelOuter[2] = 10.0 / d;
+		gl_TessLevelOuter[3] = 10.0 / d;
+	}
+}
