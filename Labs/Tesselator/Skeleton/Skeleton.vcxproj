@@ -91,6 +91,7 @@
     <ClInclude Include="..\..\..\Common\src\quad.hpp" />
     <ClInclude Include="..\..\..\Common\src\shader.hpp" />
     <ClInclude Include="..\..\..\Common\src\texture.hpp" />
+    <ClInclude Include="camera.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\tess.frag" />

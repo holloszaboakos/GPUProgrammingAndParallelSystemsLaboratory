@@ -74,21 +74,27 @@
     <ClInclude Include="..\..\..\Common\src\shader.hpp">
       <Filter>Common\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
-      <Filter>Common\Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shaders\tess.frag">
+    <None Include="..\shaders\gravity.comp">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\shaders\tess.tc">
+    <None Include="..\shaders\render.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\shaders\tess.te">
+    <None Include="..\shaders\render.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\shaders\tess.vert">
+    <None Include="..\shaders\collision.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\distance.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\finalUpdate.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\bending.comp">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -1,9 +1,16 @@
 #version 330
 
-in vec4 vPosition;
-out vec4 tPosition;
+in vec3 vPosition;
+out vec3 tPosition;
+uniform sampler2D data;
 
 void main()
 {
-	tPosition = vPosition * mat4( 1,0,0,0, 0, cos(1.0f), -sin(1.0f), 0, 0, sin( 1.0f ), cos(1.0f), 0, 0,0,0,1  );
+	tPosition = vec3(
+		vPosition.xy, 
+		dot(
+			texture(data, -1 + vPosition.xy/ 4 - vec2(0.5,0.5)),
+			vec4(0.21,0.39,0.4,0.0)
+			) / 4
+	 ) ;
 }

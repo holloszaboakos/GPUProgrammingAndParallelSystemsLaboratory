@@ -8,14 +8,14 @@
 
 #include "shader.hpp"
 #include "texture.hpp"
-#include "quad.hpp"
+#include "particle.hpp"
 
 const unsigned int windowWidth = 600;
 const unsigned int windowHeight = 600;
 
-Quad quad;
 Shader shader;
 Texture2D image;
+Particle particle;
 
 void onInitialization()
 {
@@ -27,9 +27,11 @@ void onInitialization()
 	}
 
 	glClearColor(0.4f, 0.6f, 0.8f, 1.0f);
-	quad.init();
-	shader.loadShader(GL_VERTEX_SHADER, "..\\shaders\\passthrough.vert");
-	shader.loadShader(GL_FRAGMENT_SHADER, "..\\shaders\\simple.frag");
+	particle.init();
+	glProgramParameteri((GLuint)&shader, GL_GEOMETRY_INPUT_TYPE, GL_POINTS);
+	shader.loadShader(GL_VERTEX_SHADER, "..\\shaders\\particle.vert");
+	shader.loadShader(GL_GEOMETRY_SHADER, "..\\shaders\\particle.geom");
+	shader.loadShader(GL_FRAGMENT_SHADER, "..\\shaders\\particle.frag");
 	shader.compile();
 
 	image.initialize(100, 100);
@@ -42,7 +44,7 @@ void onDisplay()
 
 	shader.enable();
 	shader.setUniformTexture("data", image.getTextureHandle(), 0);
-	quad.render();
+	particle.render();
 	shader.disable();
 
 	glutSwapBuffers();
@@ -54,6 +56,20 @@ void onKeyboard(unsigned char key, int pX, int pY) {
 	case 27:
 		glutExit();
 		break;
+	}
+}
+
+void onMouse(int button, int state, int mousex, int mousey)
+{
+}
+
+long oldTime = 0;
+// Idle event indicating that some time elapsed: do animation here
+void onIdle() {
+	long time = glutGet(GLUT_ELAPSED_TIME); // elapsed time since the start of the program
+	if ((long)time - oldTime > 100L) {
+		glutPostRedisplay();					// redraw the scene
+		oldTime = time;
 	}
 }
 
@@ -79,10 +95,12 @@ int main(int argc, char* argv[])
 	printf("GLSL Version : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	onInitialization();
+	glutIdleFunc(onIdle);
 	glutDisplayFunc(onDisplay);
 	glutKeyboardFunc(onKeyboard);
+	glutMouseFunc(onMouse);
 	glutMainLoop();
 
-    return 0;
+	return 0;
 }
 

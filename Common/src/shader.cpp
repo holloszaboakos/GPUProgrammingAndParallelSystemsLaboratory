@@ -28,7 +28,7 @@ Shader::Shader(void) :
 
 Shader::~Shader(void)
 {
-  glDeleteProgram(programID);
+	glDeleteProgram(programID);
 }
 
 bool Shader::loadShader(GLuint type, std::string filename)
@@ -96,7 +96,7 @@ bool Shader::loadShader(GLuint type, std::string filename)
 	return true;
 }
 
-bool Shader::loadShaderSource(std::string &source, std::string filename)
+bool Shader::loadShaderSource(std::string& source, std::string filename)
 {
 	std::ifstream shaderStream(filename, std::ios::in);
 	if (shaderStream.is_open())
@@ -222,9 +222,11 @@ bool Shader::compile()
 
 	if (hasVertexShader)
 	{
-		glBindAttribLocation(programID, 0, "vPosition");
-		glBindAttribLocation(programID, 1, "vNormal");
-		glBindAttribLocation(programID, 2, "vTexCoord");
+		glBindAttribLocation(programID, 0, "vMovingPoint");
+	}
+	if (hasGeometryShader) {
+		const GLchar* feedbackVaryings[] = { "newMovingPoint" };
+		glTransformFeedbackVaryings(programID, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 	}
 
 	glLinkProgram(programID);
@@ -266,7 +268,7 @@ bool Shader::setUniformMat4(std::string name, const glm::mat4& m)
 	return true;
 }
 
-bool Shader::setUniformMat4(std::string name, GLfloat *m)
+bool Shader::setUniformMat4(std::string name, GLfloat* m)
 {
 	GLuint id = glGetUniformLocation(programID, name.c_str());
 	glUniformMatrix4fv(id, 1, GL_FALSE, m);
@@ -329,7 +331,7 @@ bool Shader::setUniform1i(std::string name, int i)
 	return true;
 }
 
-bool Shader::setUniform1i(std::string name, int count, int *i)
+bool Shader::setUniform1i(std::string name, int count, int* i)
 {
 	GLuint id = glGetUniformLocation(programID, name.c_str());
 	glUniform1iv(id, count, i);

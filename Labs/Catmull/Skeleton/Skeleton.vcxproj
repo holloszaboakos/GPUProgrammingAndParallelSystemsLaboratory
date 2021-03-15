@@ -80,6 +80,8 @@
     <ClCompile Include="..\..\..\Common\src\quad.cpp" />
     <ClCompile Include="..\..\..\Common\src\shader.cpp" />
     <ClCompile Include="..\..\..\Common\src\texture.cpp" />
+    <ClCompile Include="catmull.cpp" />
+    <ClCompile Include="catmull.hpp" />
     <ClCompile Include="Skeleton.cpp" />
   </ItemGroup>
   <ItemGroup>

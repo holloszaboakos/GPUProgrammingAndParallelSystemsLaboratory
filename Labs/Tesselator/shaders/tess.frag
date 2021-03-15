@@ -1,11 +1,12 @@
 #version 430
 
-in vec3 tePosition;
 out vec4 outColor;
+
+uniform sampler2D data;
+in vec3 tePosition;
 
 void main()
 {
-	vec3 dist = tePosition - vec3(0.5f,0.5f,1);
-	float height = sqrt(dot(dist,dist)) / 2;
-	outColor = vec4(height, height*height, height*height*height, 1.0);
+	float intensity = dot(texture(data, tePosition.xy/ 4 - vec2(0.5,0.5)),vec4(0.21,0.39,0.4,0.0));
+	outColor = vec4(intensity,intensity,intensity,1.0);
 }

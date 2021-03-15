@@ -8,12 +8,12 @@
 
 #include "shader.hpp"
 #include "texture.hpp"
-#include "quad.hpp"
+#include "catmull.hpp"
 
 const unsigned int windowWidth = 600;
 const unsigned int windowHeight = 600;
 
-Quad quad;
+Catmull catmull;
 Shader shader;
 Texture2D image;
 
@@ -27,9 +27,11 @@ void onInitialization()
 	}
 
 	glClearColor(0.4f, 0.6f, 0.8f, 1.0f);
-	quad.init();
-	shader.loadShader(GL_VERTEX_SHADER, "..\\shaders\\passthrough.vert");
-	shader.loadShader(GL_FRAGMENT_SHADER, "..\\shaders\\simple.frag");
+	catmull.init();
+	glProgramParameteri((GLuint) &shader, GL_GEOMETRY_INPUT_TYPE, GL_POINTS);
+	shader.loadShader(GL_VERTEX_SHADER, "..\\shaders\\catmull.vert");
+	shader.loadShader(GL_GEOMETRY_SHADER, "..\\shaders\\catmull.geom");
+	shader.loadShader(GL_FRAGMENT_SHADER, "..\\shaders\\catmull.frag");
 	shader.compile();
 
 	image.initialize(100, 100);
@@ -42,7 +44,7 @@ void onDisplay()
 
 	shader.enable();
 	shader.setUniformTexture("data", image.getTextureHandle(), 0);
-	quad.render();
+	catmull.render();
 	shader.disable();
 
 	glutSwapBuffers();
@@ -55,6 +57,13 @@ void onKeyboard(unsigned char key, int pX, int pY) {
 		glutExit();
 		break;
 	}
+}
+
+void onMouse(int button, int state, int mousex, int mousey) 
+	{
+		if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+			catmull.addPoint((mousex * 2.0f / windowWidth)-1.0f, (mousey * (-2.0f) / windowHeight) + 1.0f);
+		}
 }
 
 int main(int argc, char* argv[])
@@ -81,6 +90,7 @@ int main(int argc, char* argv[])
 	onInitialization();
 	glutDisplayFunc(onDisplay);
 	glutKeyboardFunc(onKeyboard);
+	glutMouseFunc(onMouse);
 	glutMainLoop();
 
     return 0;

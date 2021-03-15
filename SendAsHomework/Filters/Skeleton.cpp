@@ -29,7 +29,7 @@ void onInitialization()
 	glClearColor(0.4f, 0.6f, 0.8f, 1.0f);
 	quad.init();
 	shader.loadShader(GL_VERTEX_SHADER, "..\\shaders\\passthrough.vert");
-	shader.loadShader(GL_FRAGMENT_SHADER, "..\\shaders\\simple.frag");
+	shader.loadShader(GL_FRAGMENT_SHADER, "..\\shaders\\filter.frag");
 	shader.compile();
 
 	image.initialize(100, 100);
@@ -42,8 +42,12 @@ void onDisplay()
 
 	shader.enable();
 	shader.setUniformTexture("data", image.getTextureHandle(), 0);
+	shader.setUniform1i("textureHeight", 512);
+	shader.setUniform1i("textureWidth", 512);
+	shader.setUniform1i("mode", 4);
 	quad.render();
 	shader.disable();
+	//512
 
 	glutSwapBuffers();
 }

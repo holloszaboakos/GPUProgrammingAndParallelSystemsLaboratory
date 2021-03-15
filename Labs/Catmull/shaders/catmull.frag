@@ -2,10 +2,10 @@
 
 uniform sampler2D data;
 
-in vec2 fTexCoord;
+in vec3 fColor;
 out vec4 outColor;
 
 void main()
 {
-	outColor = texture(data, fTexCoord);
+	outColor = vec4(fColor,1.0);
 }
