@@ -2,9 +2,38 @@
 #extension GL_ARB_compute_shader : enable
 #extension GL_ARB_shader_storage_buffer_object : enable
 
+layout(std430, binding = 0) buffer positionBuffer
+{
+	vec4 position[];
+};
+
+layout(std430, binding = 1) buffer velocityBuffer
+{
+	vec4 velocity[];
+};
+
+layout(std430, binding = 2) buffer positionBufferTmp
+{
+	vec4 positionTmp[];
+};
+
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 void main()
 {
+	float timeDiff = 0.05;
+
+	//gravity
+	vec3 gravityAcceleration = vec3(0.0,-1.0,0.0);
+
+	uint gidX = gl_GlobalInvocationID.x;
+	uint gidY = gl_GlobalInvocationID.y;
+
+	vec3 pos = position[gidX*64+gidY].xyz;
+	vec3 vel = velocity[gidX*64+gidY].xyz;
+
+	vec3 nVel = vel + timeDiff * gravityAcceleration;
 	//TODO implement external forces
+	velocity[gidX*64+gidY].xyz = nVel;
+	positionTmp[gidX*64+gidY].xyz = pos + timeDiff * nVel;
 }

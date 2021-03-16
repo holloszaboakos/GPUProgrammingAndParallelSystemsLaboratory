@@ -23,7 +23,7 @@ const unsigned int N = 64;
 // Workgroup Size
 const unsigned int Nwg = 32;
 // Number of vertices (resX=resY)
-const unsigned int vNum = N*N;
+const unsigned int vNum = N * N;
 
 // Vec4 like structure
 struct xyzw
@@ -89,12 +89,12 @@ void onInitialization()
 	xyzw* pos = (xyzw*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, vNum * sizeof(xyzw), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	for (unsigned int i = 0; i < N; ++i)
 		for (unsigned int j = 0; j < N; ++j)
-	{
-		pos[j*N+i].x = (double)i / ((double)N - 1.0) - 0.5;
-		pos[j*N+i].y = 0;
-		pos[j*N+i].z = (double)j / ((double)N - 1.0) - 0.5;
-		pos[j*N+i].w = 1.0f;
-	}
+		{
+			pos[j * N + i].x = (double)i / ((double)N - 1.0) - 0.5;
+			pos[j * N + i].y = 0;
+			pos[j * N + i].z = (double)j / ((double)N - 1.0) - 0.5;
+			pos[j * N + i].w = 1.0f;
+		}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
 	glGenBuffers(1, &positionBufferTmp);
@@ -107,7 +107,7 @@ void onInitialization()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velocityBuffer);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, vNum * sizeof(xyzw), NULL, GL_STATIC_DRAW);
 	xyzw* vel = (xyzw*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, vNum * sizeof(xyzw), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-	for (unsigned int i = 0; i < N*N; ++i)
+	for (unsigned int i = 0; i < N * N; ++i)
 	{
 		vel[i].x = 0;
 		vel[i].y = 0;
@@ -115,7 +115,7 @@ void onInitialization()
 		vel[i].w = 0;
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-			
+
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	// Initialize the vertex array object with the position and velocity buffers
@@ -130,33 +130,60 @@ void onInitialization()
 
 	// Set point primitive size
 	glPointSize(8.0f);
+	// Update position and velocity
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, positionBuffer);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, positionBufferTmp);
 }
 
 void onDisplay()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 	glm::mat4 view = glm::lookAt(glm::vec3(0, 0.5, 2.5), glm::vec3(0, -0.5, 0.5), glm::vec3(0, 1, 0));
-	glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)windowWidth/ (float)windowHeight, 0.1f, 10.0f);
-		
+	glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 0.1f, 10.0f);
+
+	//call External force shader
 	const float dt = 0.0001f;
-	//TODO call External force shader
-	
+	vertexGravityShader.enable();
+	glDispatchCompute(2, 2, 1);
+	// Synchronize between the compute and render shaders
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+
 	const int NITER = 50;
 	for (int i = 0; i < NITER; ++i)
 	{
-		//TODO call constraint shaders		
+		// Synchronize between the compute and render shaders
+		//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+		vertexCollisionShader.enable();
+		glDispatchCompute(2, 2, 1);
+		// Synchronize between the compute and render shaders
+		//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+		vertexDistanceShader.enable();
+		glDispatchCompute(2, 2, 1);
+		// Synchronize between the compute and render shaders
+		//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+		vertexBendingShader.enable();
+		glDispatchCompute(2, 2, 1);
 	}
-	
+	// Synchronize between the compute and render shaders
+	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+
 	//TODO call final update Shader
-	
+	vertexFinalUpdateShader.enable();
+	glDispatchCompute(2, 2, 1);
+
+	// Synchronize between the compute and render shaders
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+
 	// Render the particles
 	renderShader.enable();
-	renderShader.setUniformMat4("viewproj", proj*view);
+	renderShader.setUniformMat4("viewproj", proj * view);
 	glBindVertexArray(vao);
-	glEnable(GL_BLEND); 
+	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_POINTS, 0, N*N);
+	glDrawArrays(GL_POINTS, 0, N * N);
 	glBindVertexArray(0);
 	renderShader.disable();
 

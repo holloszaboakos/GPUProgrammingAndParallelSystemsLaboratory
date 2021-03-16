@@ -2,9 +2,48 @@
 #extension GL_ARB_compute_shader : enable
 #extension GL_ARB_shader_storage_buffer_object : enable
 
+layout(std430, binding = 0) buffer positionBuffer
+{
+	vec4 position[];
+};
+
+layout(std430, binding = 1) buffer velocityBuffer
+{
+	vec4 velocity[];
+};
+
+layout(std430, binding = 2) buffer positionBufferTmp
+{
+	vec4 positionTmp[];
+};
+
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 void main()
 {
+	
+	float timeDiff = 0.1;
+	float weight = 0.9;
+	vec3 sphereCenter = vec3(0,-0.5,0);
+	float radius = 0.5;
+
+
+	uint gidX = gl_GlobalInvocationID.x;
+	uint gidY = gl_GlobalInvocationID.y;
+
+	vec3 pos = positionTmp[gidX*64+gidY].xyz;
+	vec3 vel = velocity[gidX*64+gidY].xyz;
+
+	vec3 nVel = vec3(0,0,0);
+	if(length(pos - sphereCenter) < radius){
+		float l = length(pos - sphereCenter);
+		vec3 dir = normalize(pos - sphereCenter);
+		nVel = ( radius - l ) * dir * weight;
+	}
+
 	//TODO implement collision constraint
+	velocity[gidX*64+gidY].xyz = vel + nVel;
+	positionTmp[gidX*64+gidY].xyz = pos + timeDiff * nVel;
+	
+
 }
