@@ -222,7 +222,8 @@ bool Shader::compile()
 
 	if (hasVertexShader)
 	{
-		glBindAttribLocation(programID, 0, "vMovingPoint");
+		glBindAttribLocation(programID, 0, "vPosition");
+		glBindAttribLocation(programID, 1, "vVelocity");
 	}
 	if (hasGeometryShader) {
 		const GLchar* feedbackVaryings[] = { "newMovingPoint" };
